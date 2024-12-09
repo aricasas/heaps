@@ -1,4 +1,10 @@
 mod binary_heap;
+mod bino_heap;
+mod binomial_heap;
+mod nodes;
+
+#[cfg(test)]
+mod tests;
 
 pub trait Item: Ord {}
 impl<I: Ord> Item for I {}
@@ -6,7 +12,7 @@ impl<I: Ord> Item for I {}
 pub trait MinHeap: Default {
     type Item;
 
-    fn new() -> Self {
+    fn make_heap() -> Self {
         Self::default()
     }
     fn peek_min(&self) -> Option<&Self::Item>;
@@ -27,3 +33,4 @@ pub fn naive_heap_sort<I, T: MinHeap<Item = I>>(items: Vec<I>) -> Vec<I> {
 }
 
 pub use binary_heap::BinaryHeap;
+pub use binomial_heap::BinomialHeap;
