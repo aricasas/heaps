@@ -1,6 +1,7 @@
+#![warn(clippy::all, clippy::cargo)]
+
 mod binary_heap;
 mod bino_heap;
-mod binomial_heap;
 mod nodes;
 
 #[cfg(test)]
@@ -33,4 +34,4 @@ pub fn naive_heap_sort<I, T: MinHeap<Item = I>>(items: Vec<I>) -> Vec<I> {
 }
 
 pub use binary_heap::BinaryHeap;
-pub use binomial_heap::BinomialHeap;
+pub use bino_heap::BinomialHeap;

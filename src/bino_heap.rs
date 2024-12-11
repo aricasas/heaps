@@ -25,7 +25,7 @@ impl<I: Item> BinomialTreeNode<I> {
         })
     }
 
-    fn split_remove_root(mut self) -> (I, BinomialTreeLink<I>) {
+    fn split_remove_root(mut self) -> (I, BinomialHeap<I>) {
         debug_assert!(self.next_sibling.is_none());
 
         let mut left_child = self.left_child.take();
@@ -38,24 +38,64 @@ impl<I: Item> BinomialTreeNode<I> {
         }
         mem::swap(&mut left_child, rev);
 
-        (self.item, left_child)
+        (self.item, BinomialHeap { head: left_child })
     }
 
-    fn binomial_link(&mut self, mut other: Box<Self>) {
-        debug_assert_eq!(self.degree, other.degree);
-        debug_assert!(self.next_sibling.is_none());
-        debug_assert!(other.next_sibling.is_none());
-
+    fn link(&mut self, mut other: Box<Self>) {
         if self.item > other.item {
             mem::swap(self, &mut other);
         }
+        self.link_as_child(other);
+    }
+
+    fn link_as_child(&mut self, mut other: Box<Self>) {
+        debug_assert_eq!(self.degree, other.degree);
+        debug_assert!(other.next_sibling.is_none());
+        debug_assert!(self.item <= other.item);
 
         other.next_sibling = self.left_child.take();
         self.left_child = Some(other);
         self.degree += 1;
+    }
 
-        // Check that this is all thats needed, and if the asserts make sense, and maybe assume that self.item <= other.item
-        todo!();
+    fn merge_by_degree(
+        list_a: BinomialTreeLink<I>,
+        list_b: BinomialTreeLink<I>,
+    ) -> BinomialTreeLink<I> {
+        let mut new_list = None;
+
+        let mut list_tail = &mut new_list;
+        let mut cursor_a = list_a;
+        let mut cursor_b = list_b;
+        loop {
+            debug_assert!(list_tail.is_none());
+
+            match (cursor_a.take(), cursor_b.take()) {
+                (None, None) => break,
+                (Some(mut a), None) => {
+                    cursor_a = a.next_sibling.take();
+                    *list_tail = Some(a);
+                }
+                (None, Some(mut b)) => {
+                    cursor_b = b.next_sibling.take();
+                    *list_tail = Some(b);
+                }
+                (Some(mut a), Some(mut b)) => {
+                    if a.degree <= b.degree {
+                        cursor_a = a.next_sibling.take();
+                        cursor_b = Some(b);
+                        *list_tail = Some(a);
+                    } else {
+                        cursor_a = Some(a);
+                        cursor_b = b.next_sibling.take();
+                        *list_tail = Some(b);
+                    }
+                }
+            }
+            list_tail = &mut list_tail.as_mut().unwrap().next_sibling;
+        }
+
+        new_list
     }
 }
 
@@ -101,7 +141,8 @@ impl<I: Item> BinomialHeap<I> {
             } else if let Some(tree) = curr_link {
                 curr_link = &mut tree.next_sibling;
             } else {
-                return None;
+                // We return in the first line if no min exists, so we expect to reach in some iteration
+                unreachable!()
             }
         }
     }
@@ -121,7 +162,6 @@ impl<I: Item> MinHeap for BinomialHeap<I> {
 
         // Build a new heap with the elements from the min tree except the root
         let (min, rest) = min_tree.split_remove_root();
-        let rest = Self { head: rest };
 
         // Push all those elements back into the heap
         let original_heap = mem::take(self);
@@ -151,13 +191,65 @@ impl<I: Item> MinHeap for BinomialHeap<I> {
     }
 
     fn meld(heap_a: Self, heap_b: Self) -> Self {
-        todo!()
+        let mut list_head = BinomialTreeNode::merge_by_degree(heap_a.head, heap_b.head);
+        if list_head.is_none() {
+            return Self::make_heap();
+        }
+
+        let mut x = list_head.take().unwrap();
+        let mut next_x = x.next_sibling.take();
+        let mut list_tail = &mut list_head;
+
+        while let Some(mut next) = next_x {
+            if x.degree != next.degree
+                || next
+                    .next_sibling
+                    .as_ref()
+                    .is_some_and(|nn_x| nn_x.degree == x.degree)
+            {
+                *list_tail = Some(x);
+                list_tail = &mut list_tail.as_mut().unwrap().next_sibling;
+                x = next;
+                next_x = x.next_sibling.take();
+            } else {
+                next_x = next.next_sibling.take();
+                x.link(next);
+            }
+        }
+        debug_assert!(list_tail.is_none());
+        *list_tail = Some(x);
+
+        Self { head: list_head }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::tests;
+
+    #[test]
+    fn binomial_insertion() {
+        let mut heap = BinomialHeap::make_heap();
+        heap.insert(10);
+        let head = heap.head.as_ref().unwrap();
+        assert_eq!(head.degree, 0);
+        assert_eq!(head.item, 10);
+        assert!(head.next_sibling.is_none());
+        assert!(head.left_child.is_none());
+        heap.insert(5);
+        let head = heap.head.as_ref().unwrap();
+        assert_eq!(head.degree, 1);
+        assert_eq!(head.item, 5);
+        assert!(head.next_sibling.is_none());
+        let child = head.left_child.as_ref().unwrap();
+        assert_eq!(child.degree, 0);
+        assert_eq!(child.item, 10);
+        assert!(child.left_child.is_none());
+        assert!(child.next_sibling.is_none());
+        assert_eq!(heap.extract_min().unwrap(), 5);
+        assert_eq!(heap.extract_min().unwrap(), 10);
+    }
 
     #[test]
     fn binomial_heap_split() {
@@ -186,23 +278,34 @@ mod tests {
             left_child: Some(z),
         };
         let (num, rest) = parent.split_remove_root();
+        let first = rest.head.as_ref().unwrap();
+        let second = first.next_sibling.as_ref().unwrap();
+        let third = second.next_sibling.as_ref().unwrap();
         assert_eq!(0, num);
-        assert_eq!(1, rest.as_ref().unwrap().item);
-        assert_eq!(
-            2,
-            rest.as_ref().unwrap().next_sibling.as_ref().unwrap().item
-        );
-        assert_eq!(
-            3,
-            rest.as_ref()
-                .unwrap()
-                .next_sibling
-                .as_ref()
-                .unwrap()
-                .next_sibling
-                .as_ref()
-                .unwrap()
-                .item
-        );
+        assert_eq!(1, first.item);
+        assert_eq!(2, second.item);
+        assert_eq!(3, third.item);
+    }
+
+    type HeapU32 = BinomialHeap<u32>;
+
+    #[test]
+    fn binomial_heap_simple() {
+        tests::simple::<HeapU32>();
+    }
+
+    #[test]
+    fn binomial_heap_heapify() {
+        tests::heapify::<HeapU32>();
+    }
+
+    #[test]
+    fn binomial_heap_meld() {
+        tests::meld::<HeapU32>();
+    }
+
+    #[test]
+    fn binomial_heap_sort() {
+        tests::sort::<HeapU32>();
     }
 }

@@ -5,26 +5,22 @@ pub struct BinaryHeap<I: Item> {
 }
 
 #[inline(always)]
-fn parent(i: usize) -> usize {
+const fn parent(i: usize) -> usize {
     (i - 1) / 2
 }
 #[inline(always)]
-fn left(i: usize) -> usize {
+const fn left(i: usize) -> usize {
     2 * i + 1
 }
 #[inline(always)]
-fn right(i: usize) -> usize {
+const fn right(i: usize) -> usize {
     2 * i + 2
 }
 #[inline(always)]
 fn min_child<I: Item>(items: &[I], i: usize) -> usize {
     if left(i) >= items.len() {
-        return i;
-    }
-    if right(i) >= items.len() {
-        return left(i);
-    }
-    if items[left(i)] < items[right(i)] {
+        i
+    } else if right(i) >= items.len() || items[left(i)] < items[right(i)] {
         left(i)
     } else {
         right(i)
@@ -60,7 +56,7 @@ impl<I: Item> MinHeap for BinaryHeap<I> {
     type Item = I;
 
     fn peek_min(&self) -> Option<&Self::Item> {
-        self.array.get(0)
+        self.array.first()
     }
 
     fn extract_min(&mut self) -> Option<Self::Item> {
@@ -99,23 +95,25 @@ mod tests {
     use super::BinaryHeap;
     use crate::tests;
 
+    type HeapU32 = BinaryHeap<u32>;
+
     #[test]
     fn binary_heap_simple() {
-        tests::simple::<BinaryHeap<u32>>();
+        tests::simple::<HeapU32>();
     }
 
     #[test]
     fn binary_heap_heapify() {
-        tests::heapify::<BinaryHeap<u32>>();
+        tests::heapify::<HeapU32>();
     }
 
     #[test]
     fn binary_heap_meld() {
-        tests::meld::<BinaryHeap<u32>>();
+        tests::meld::<HeapU32>();
     }
 
     #[test]
     fn binary_heap_sort() {
-        tests::sort::<BinaryHeap<u32>>();
+        tests::sort::<HeapU32>();
     }
 }

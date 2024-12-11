@@ -78,12 +78,10 @@ impl<I> Iterator for IntoIterList<I> {
     type Item = Box<ListNode<I>>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(mut x) = self.0.take() {
-            *self = IntoIterList(x.next.take());
-            Some(x)
-        } else {
-            None
-        }
+        self.0.take().map(|mut x| {
+            *self = Self(x.next.take());
+            x
+        })
     }
 }
 impl<I> IntoIterator for List<I> {
