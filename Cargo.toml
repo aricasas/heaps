@@ -1,6 +1,13 @@
 [package]
+authors = ["Ari Casas Nassar"]
 name = "heaps"
 version = "0.1.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/aricasas/heaps/"
+readme = "README.md"
+categories = ["data-structures"]
+keywords = ["data-structures", "heap", "min-heap", "max-heap", "priority-queue"]
+description = "A collection of min-heaps written in Rust"
 
 [dependencies]
