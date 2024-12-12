@@ -98,22 +98,51 @@ mod tests {
     type HeapU32 = BinaryHeap<u32>;
 
     #[test]
-    fn binary_heap_simple() {
+    fn simple() {
         tests::simple::<HeapU32>();
     }
-
     #[test]
-    fn binary_heap_heapify() {
-        tests::heapify::<HeapU32>();
+    fn empty_heap() {
+        tests::empty_heap::<HeapU32>();
     }
-
     #[test]
-    fn binary_heap_meld() {
+    fn insert_after_extract() {
+        tests::insert_after_extract::<HeapU32>();
+    }
+    #[test]
+    fn duplicate_items() {
+        tests::duplicate_items::<HeapU32>();
+    }
+    #[test]
+    fn mixed_insertions_and_extractions() {
+        tests::mixed_insertions_and_extractions::<HeapU32>();
+    }
+    #[test]
+    fn meld() {
         tests::meld::<HeapU32>();
     }
-
     #[test]
-    fn binary_heap_sort() {
-        tests::sort::<HeapU32>();
+    fn heapify() {
+        tests::heapify::<HeapU32>();
+    }
+    #[test]
+    fn heapify_duplicates() {
+        tests::heapify_duplicates::<HeapU32>();
+    }
+    #[test]
+    fn large_input() {
+        tests::large_input::<HeapU32>();
+    }
+    #[test]
+    fn meld_empty_and_non_empty() {
+        tests::meld_empty_and_non_empty::<HeapU32>();
+    }
+    #[test]
+    fn meld_two_empty_heaps() {
+        tests::meld_two_empty_heaps::<HeapU32>();
+    }
+    #[test]
+    fn sort_small_list() {
+        tests::sort_small_list::<HeapU32>();
     }
 }

@@ -2,7 +2,7 @@
 
 mod binary_heap;
 mod binomial_heap;
-mod nodes;
+mod lazy_binomial;
 
 #[cfg(test)]
 mod tests;
@@ -35,3 +35,4 @@ pub fn naive_heap_sort<I, T: MinHeap<Item = I>>(items: Vec<I>) -> Vec<I> {
 
 pub use binary_heap::BinaryHeap;
 pub use binomial_heap::BinomialHeap;
+pub use lazy_binomial::LazyBinomialHeap;
