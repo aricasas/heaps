@@ -171,10 +171,3 @@ pub fn meld_two_empty_heaps<H: MinHeap<Item = u32>>() {
 
     assert_eq!(heap_ab.extract_min(), None);
 }
-
-pub fn sort_small_list<H: MinHeap<Item = u32>>() {
-    let items = vec![4, 6, 3, 2, 5, 64, 2, 1];
-    let sorted = crate::naive_heap_sort::<u32, H>(items);
-    assert!(sorted.is_sorted());
-    assert_eq!(sorted, [1, 2, 2, 3, 4, 5, 6, 64]);
-}

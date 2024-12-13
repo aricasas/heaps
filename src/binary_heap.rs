@@ -141,8 +141,4 @@ mod tests {
     fn meld_two_empty_heaps() {
         tests::meld_two_empty_heaps::<HeapU32>();
     }
-    #[test]
-    fn sort_small_list() {
-        tests::sort_small_list::<HeapU32>();
-    }
 }

@@ -23,16 +23,6 @@ pub trait MinHeap: Default {
     fn meld(heap_a: Self, heap_b: Self) -> Self;
 }
 
-pub fn naive_heap_sort<I, T: MinHeap<Item = I>>(items: Vec<I>) -> Vec<I> {
-    let length = items.len();
-    let mut heap = T::heapify(items);
-    let mut sorted = Vec::with_capacity(length);
-    while let Some(x) = heap.extract_min() {
-        sorted.push(x);
-    }
-    sorted
-}
-
 pub use binary_heap::BinaryHeap;
 pub use binomial_heap::BinomialHeap;
 pub use lazy_binomial::LazyBinomialHeap;

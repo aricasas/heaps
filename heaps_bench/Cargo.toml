@@ -1,0 +1,9 @@
+[package]
+authors = ["Ari Casas Nassar"]
+name = "heaps_bench"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+heaps = { version = "0.1.0", path = "../" }
+rand = "0.8.5"
