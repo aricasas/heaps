@@ -43,6 +43,7 @@ pub fn benchmark_heaps_sort<T: Item + Clone + BenchElemType>(
     sorted.sort_unstable();
     let duration = before.elapsed();
     eprintln!("Sorted {:?} array length {} in {:?}", mode, len, duration);
+    eprintln!();
 
     println!(
         "Heapsort {:?} array: n={} elem_size={}",
@@ -53,14 +54,17 @@ pub fn benchmark_heaps_sort<T: Item + Clone + BenchElemType>(
 
     if binary {
         let duration = benchmark_sort::<T, BinaryHeap<T>>(&array, &sorted);
-        println!("    Binary Heap: duration={:?}", duration);
+        println!("  Binary Heap: duration={}s", duration.as_secs_f64());
     }
     if binomial {
         let duration = benchmark_sort::<T, BinomialHeap<T>>(&array, &sorted);
-        println!("    Binomial Heap: duration={:?}", duration);
+        println!("  Binomial Heap: duration={}s", duration.as_secs_f64());
     }
     if lazy {
         let duration = benchmark_sort::<T, LazyBinomialHeap<T>>(&array, &sorted);
-        println!("    Lazy One-Pass Binomial Heap: duration={:?}", duration);
+        println!(
+            "  Lazy One-Pass Binomial Heap: duration={}s",
+            duration.as_secs_f64()
+        );
     }
 }
